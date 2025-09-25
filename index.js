@@ -37,12 +37,26 @@ async function run() {
     });
 
     app.get("/users", async (req, res) => {
-      const cursor = userCollection.find();
+      const email = req.query.email;
+      let query = {}
+
+      if(email){
+        query.email = email;
+      }
+
+      const cursor = userCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
-    })
+    });
 
     app.post("/users", async (req, res) => {
+      const { email } = req.body;
+      const existingUser = await userCollection.findOne({ email });
+
+      if(existingUser){
+        return res.send("user is already axists.")
+      }
+
       const newUser = req.body;
       const result = await userCollection.insertOne(newUser);
       res.send(result);
