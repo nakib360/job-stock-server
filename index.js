@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
 const app = express();
 const port = process.env.PORT || 3000;
 dotenv.config();
@@ -36,11 +36,18 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/jobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await allJobsCollection.findOne(query)
+      res.send(result);
+    });
+
     app.get("/users", async (req, res) => {
       const email = req.query.email;
-      let query = {}
+      let query = {};
 
-      if(email){
+      if (email) {
         query.email = email;
       }
 
@@ -49,12 +56,33 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.put("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const { _id, ...updatedData } = req.body;
+
+      const result = await userCollection.findOneAndUpdate(
+        query,
+        { $set: updatedData },
+        { returnDocument: "after" }
+      );
+
+      res.send(result);
+    });
+
     app.post("/users", async (req, res) => {
       const { email } = req.body;
       const existingUser = await userCollection.findOne({ email });
 
-      if(existingUser){
-        return res.send("user is already axists.")
+      if (existingUser) {
+        return res.send("user is already axists.");
       }
 
       const newUser = req.body;
