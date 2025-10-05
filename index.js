@@ -39,8 +39,24 @@ async function run() {
     app.get("/jobs/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await allJobsCollection.findOne(query)
+      const result = await allJobsCollection.findOne(query);
       res.send(result);
+    });
+
+    app.post("/jobs/:id", async (req, res) => {
+      const { userId } = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const job = await allJobsCollection.findOne(query);
+
+      let appliedUsers = job.appliedUsers || [];
+      if (!appliedUsers.includes(userId)) {
+        appliedUsers.push(userId);
+      }
+
+      allJobsCollection.updateOne(query, { $set: { appliedUsers } });
+
+      res.send("applicant pushed");
     });
 
     app.get("/users", async (req, res) => {
@@ -61,6 +77,22 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await userCollection.findOne(query);
       res.send(result);
+    });
+
+    app.post("/users/:id", async (req, res) => {
+      const { jobId } = req.body;
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const user = await userCollection.findOne(query);
+
+      let myAppliedJobs = user.myAppliedJobs || [];
+      if (!myAppliedJobs.includes(jobId)) {
+        myAppliedJobs.push(jobId);
+      }
+
+      userCollection.updateOne(query, { $set: { myAppliedJobs } });
+
+      res.send("success!!!!!!!!!!!!!!!!!");
     });
 
     app.put("/users/:id", async (req, res) => {
