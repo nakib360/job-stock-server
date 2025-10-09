@@ -43,6 +43,13 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/jobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await allJobsCollection.deleteOne(query);
+      res.send(result);
+    });
+
     app.post("/jobs/:id", async (req, res) => {
       const { userId } = req.body;
       const id = req.params.id;
@@ -57,6 +64,24 @@ async function run() {
       allJobsCollection.updateOne(query, { $set: { appliedUsers } });
 
       res.send("applicant pushed");
+    });
+
+    app.put("/jobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const { formData } = req.body;
+      const updateDoc = {
+        $set: formData,
+      };
+
+      const result = await allJobsCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
+    app.put("/jobs", async (req, res) => {
+      const { payload } = req.body;
+      const result = await allJobsCollection.insertOne(payload);
+      res.send(result);
     });
 
     app.get("/users", async (req, res) => {
@@ -76,6 +101,13 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await userCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.deleteOne(query);
       res.send(result);
     });
 
